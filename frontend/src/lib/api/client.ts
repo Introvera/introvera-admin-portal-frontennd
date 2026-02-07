@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
@@ -70,6 +70,31 @@ class ApiClient {
 
   async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: "DELETE" });
+  }
+
+  /**
+   * POST with FormData (file uploads).
+   * Does NOT set Content-Type so the browser can add the multipart boundary.
+   */
+  async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new ApiError(response.status, error.message || "Upload failed", error);
+    }
+
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    return response.json();
   }
 }
 
