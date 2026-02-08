@@ -11,38 +11,44 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/Logo";
 import { PasswordInput } from "@/components/ui/password-input";
-import { signIn } from "@/lib/firebase";
+import { signUp } from "@/lib/firebase";
 import { useAuth } from "@/components/providers/AuthProvider";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const { loading: authLoading } = useAuth();
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please enter your email and password.");
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
       return;
     }
 
     setLoading(true);
     try {
-      await signIn(email, password);
-      toast.success("Signed in successfully!");
-      router.push("/overview");
+      await signUp(email, password, displayName || undefined);
+      // Redirect to verify-email page
+      router.push("/verify-email");
     } catch (err: unknown) {
-      const code = (err as { code?: string })?.code;
-      if (code === "auth/email-not-verified") {
-        // Redirect to verify-email page
-        router.push("/verify-email");
-      } else {
-        const message = getFirebaseErrorMessage(err);
-        toast.error(message);
-      }
+      const message = getFirebaseErrorMessage(err);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -62,46 +68,66 @@ export default function LoginPage() {
       <div className="flex flex-col items-center space-y-4">
         <Logo variant="full" height={32} />
         <div className="text-center">
-          <h1 className="text-xl font-semibold tracking-tight">Welcome back</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to your admin account</p>
+          <h1 className="text-xl font-semibold tracking-tight">Create an account</h1>
+          <p className="text-sm text-muted-foreground mt-1">Get started with the admin portal</p>
         </div>
       </div>
 
-      {/* Login Card */}
+      {/* Register Card */}
       <Card>
         <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="displayName" className="text-[13px]">Full name</Label>
+              <Input
+                id="displayName"
+                type="text"
+                placeholder="John Doe"
+                className="h-10"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                disabled={loading}
+                autoComplete="name"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-[13px]">Email address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@introvera.com"
+                placeholder="you@example.com"
                 className="h-10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 autoComplete="email"
+                required
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-[13px]">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-[12px] font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password" className="text-[13px]">Password</Label>
               <PasswordInput
                 id="password"
-                placeholder="Enter your password"
+                placeholder="At least 6 characters"
                 className="h-10"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
-                autoComplete="current-password"
+                autoComplete="new-password"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-[13px]">Confirm password</Label>
+              <PasswordInput
+                id="confirmPassword"
+                placeholder="Repeat your password"
+                className="h-10"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loading}
+                autoComplete="new-password"
+                required
               />
             </div>
 
@@ -109,21 +135,21 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
-                "Sign in"
+                "Create account"
               )}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Register link */}
+      {/* Login link */}
       <p className="text-center text-[13px] text-muted-foreground">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">
-          Create account
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
+          Sign in
         </Link>
       </p>
 
@@ -138,17 +164,15 @@ export default function LoginPage() {
 function getFirebaseErrorMessage(err: unknown): string {
   const code = (err as { code?: string })?.code;
   switch (code) {
-    case "auth/user-not-found":
-    case "auth/wrong-password":
-    case "auth/invalid-credential":
-      return "Invalid email or password.";
-    case "auth/too-many-requests":
-      return "Too many attempts. Please try again later.";
-    case "auth/user-disabled":
-      return "This account has been disabled.";
+    case "auth/email-already-in-use":
+      return "An account with this email already exists.";
     case "auth/invalid-email":
       return "Please enter a valid email address.";
+    case "auth/weak-password":
+      return "Password must be at least 6 characters.";
+    case "auth/operation-not-allowed":
+      return "Email/password sign-up is not enabled.";
     default:
-      return "Sign in failed. Please try again.";
+      return "Registration failed. Please try again.";
   }
 }

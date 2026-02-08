@@ -1,3 +1,5 @@
+import { getIdToken } from "@/lib/firebase";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
 interface RequestOptions extends RequestInit {
@@ -6,12 +8,21 @@ interface RequestOptions extends RequestInit {
 
 /**
  * Base API client for communicating with the ASP.NET backend.
+ * Automatically attaches Firebase ID token to every request.
  */
 class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
+  }
+
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await getIdToken();
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+    return {};
   }
 
   private async request<T>(
@@ -26,10 +37,13 @@ class ApiClient {
       url += `?${searchParams.toString()}`;
     }
 
+    const authHeaders = await this.getAuthHeaders();
+
     const response = await fetch(url, {
       ...init,
       headers: {
         "Content-Type": "application/json",
+        ...authHeaders,
         ...init.headers,
       },
       credentials: "include",
@@ -37,7 +51,7 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new ApiError(response.status, error.message || "An error occurred", error);
+      throw new ApiError(response.status, error.message || error.error || "An error occurred", error);
     }
 
     // Handle 204 No Content
@@ -78,10 +92,12 @@ class ApiClient {
    */
   async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    const authHeaders = await this.getAuthHeaders();
 
     const response = await fetch(url, {
       method: "POST",
       body: formData,
+      headers: { ...authHeaders },
       credentials: "include",
     });
 
