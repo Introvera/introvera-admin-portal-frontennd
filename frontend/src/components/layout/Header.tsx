@@ -9,8 +9,10 @@ const titles: Record<string, { title: string; sub: string }> = {
   "/overview": { title: "Overview", sub: "Your dashboard at a glance" },
   "/payments": { title: "Payments", sub: "Track and manage transactions" },
   "/projects": { title: "Projects", sub: "Manage projects and tasks" },
-  "/users": { title: "Users", sub: "Manage your team" },
+  "/users": { title: "Users", sub: "Manage team members and roles" },
+  "/roles": { title: "Roles & Permissions", sub: "Configure access control" },
   "/settings": { title: "Settings", sub: "Configure your portal" },
+  "/welcome-request-access": { title: "Welcome", sub: "Request access to get started" },
 };
 
 export function Header() {
