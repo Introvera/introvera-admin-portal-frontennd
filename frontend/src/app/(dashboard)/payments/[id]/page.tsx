@@ -8,12 +8,11 @@ import type { PaymentTransaction } from "@/types/payment";
 import { STATUS_VARIANT, PAYMENT_METHODS } from "@/types/payment";
 import { AttachmentPanel } from "@/components/attachments/AttachmentPanel";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Loader2, Receipt, User, CreditCard, FileText, Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription,
@@ -22,9 +21,20 @@ import {
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-3 gap-4 py-3">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="col-span-2 text-sm font-medium">{children || <span className="text-muted-foreground">—</span>}</dd>
+    <div className="flex items-start gap-4 py-2.5">
+      <dt className="w-32 shrink-0 text-[12.5px] font-medium text-muted-foreground">{label}</dt>
+      <dd className="text-[13px] font-medium min-w-0">{children || <span className="text-muted-foreground/60">--</span>}</dd>
+    </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
+  return (
+    <div className="flex items-center gap-2.5 mb-3">
+      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+        <Icon className="h-3.5 w-3.5 text-primary" />
+      </div>
+      <h3 className="text-[13.5px] font-semibold">{title}</h3>
     </div>
   );
 }
@@ -80,16 +90,16 @@ export default function PaymentDetailPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
             <Link href="/payments"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold tracking-tight">{tx.transactionReference}</h2>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg font-semibold tracking-tight">{tx.transactionReference}</h2>
               <Badge variant={STATUS_VARIANT[tx.status]}>{tx.status}</Badge>
             </div>
-            <p className="text-sm text-muted-foreground">{tx.payerName}</p>
+            <p className="text-[12.5px] text-muted-foreground mt-0.5">{tx.payerName}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -102,25 +112,67 @@ export default function PaymentDetailPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      {/* Amount highlight */}
+      <Card className="bg-primary/5 border-primary/10">
+        <CardContent className="flex items-center justify-between p-5">
+          <div>
+            <p className="text-[12px] font-medium text-muted-foreground">Total Amount</p>
+            <p className="text-2xl font-bold tracking-tight tabular-nums mt-0.5">{fmt(tx.amount, tx.currency)}</p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <CreditCard className="h-6 w-6 text-primary" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-5 lg:grid-cols-5">
         {/* Details */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-5">
+          {/* Transaction Details */}
           <Card>
-            <CardHeader><CardTitle className="text-base">Transaction Details</CardTitle></CardHeader>
-            <CardContent>
-              <dl className="divide-y">
+            <CardContent className="p-5">
+              <SectionTitle icon={Receipt} title="Transaction Details" />
+              <dl className="divide-y divide-border/60">
                 <DetailRow label="Reference">{tx.transactionReference}</DetailRow>
-                <DetailRow label="Amount"><span className="text-base font-bold tabular-nums">{fmt(tx.amount, tx.currency)}</span></DetailRow>
                 <DetailRow label="Status"><Badge variant={STATUS_VARIANT[tx.status]}>{tx.status}</Badge></DetailRow>
                 <DetailRow label="Payment Method">{methodLabel(tx.paymentMethod)}</DetailRow>
-                <DetailRow label="Transaction Date">{fmtDate(tx.transactionDate)}</DetailRow>
-                <DetailRow label="Payer Name">{tx.payerName}</DetailRow>
-                <DetailRow label="Payer Email">{tx.payerEmail}</DetailRow>
-                <DetailRow label="Description">{tx.description}</DetailRow>
-                <DetailRow label="Notes">{tx.notes}</DetailRow>
+                <DetailRow label="Date">{fmtDate(tx.transactionDate)}</DetailRow>
                 <DetailRow label="Project">
                   {tx.projectId ? <Link href={`/projects/${tx.projectId}`} className="text-primary hover:underline">{tx.projectName || "View Project"}</Link> : null}
                 </DetailRow>
+              </dl>
+            </CardContent>
+          </Card>
+
+          {/* Payer Info */}
+          <Card>
+            <CardContent className="p-5">
+              <SectionTitle icon={User} title="Payer Information" />
+              <dl className="divide-y divide-border/60">
+                <DetailRow label="Name">{tx.payerName}</DetailRow>
+                <DetailRow label="Email">{tx.payerEmail}</DetailRow>
+              </dl>
+            </CardContent>
+          </Card>
+
+          {/* Additional */}
+          {(tx.description || tx.notes) && (
+            <Card>
+              <CardContent className="p-5">
+                <SectionTitle icon={FileText} title="Additional Details" />
+                <dl className="divide-y divide-border/60">
+                  {tx.description && <DetailRow label="Description">{tx.description}</DetailRow>}
+                  {tx.notes && <DetailRow label="Notes">{tx.notes}</DetailRow>}
+                </dl>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Timestamps */}
+          <Card>
+            <CardContent className="p-5">
+              <SectionTitle icon={Clock} title="Timestamps" />
+              <dl className="divide-y divide-border/60">
                 <DetailRow label="Created">{fmtDate(tx.createdAt)}</DetailRow>
                 {tx.lastModifiedAt && <DetailRow label="Last Modified">{fmtDate(tx.lastModifiedAt)}</DetailRow>}
               </dl>

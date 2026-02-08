@@ -73,8 +73,8 @@ export default function ProjectsListPage() {
       <div className="space-y-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">Projects</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Manage your projects and tasks</p>
+            <h2 className="text-lg font-semibold tracking-tight">Projects</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">Manage your projects and tasks</p>
           </div>
           <Button asChild className="gap-2"><Link href="/projects/new"><Plus className="h-4 w-4" /> New Project</Link></Button>
         </div>

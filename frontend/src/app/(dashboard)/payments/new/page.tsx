@@ -10,7 +10,7 @@ import { AttachmentPanel } from "@/components/attachments/AttachmentPanel";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 function NewPaymentContent() {
   const router = useRouter();
@@ -37,40 +37,31 @@ function NewPaymentContent() {
   const backHref = projectId ? `/projects/${projectId}` : "/payments";
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
           <Link href={backHref}><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">New Payment Transaction</h2>
-          <p className="text-sm text-muted-foreground">Fill in the details and attach documents</p>
+          <h2 className="text-lg font-semibold tracking-tight">New Payment Transaction</h2>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5">Fill in the details and attach documents</p>
         </div>
       </div>
 
-      {/* Step 1: Form only */}
+      {/* Form */}
       {!createdId && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Transaction Details</CardTitle>
-            <CardDescription>Enter the payment information below. You can attach documents after saving.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PaymentTransactionForm
-              defaultProjectId={projectId}
-              onSubmit={handleSubmit}
-              onCancel={() => router.push(backHref)}
-              isLoading={isSubmitting}
-            />
-          </CardContent>
-        </Card>
+        <PaymentTransactionForm
+          defaultProjectId={projectId}
+          onSubmit={handleSubmit}
+          onCancel={() => router.push(backHref)}
+          isLoading={isSubmitting}
+        />
       )}
 
-      {/* Step 2: Created — show success + attachments side by side */}
+      {/* Success + Attachments */}
       {createdId && (
-        <div className="space-y-6">
-          {/* Success banner */}
+        <div className="space-y-5">
           <Card className="border-emerald-500/30 bg-emerald-500/5">
             <CardContent className="flex items-center gap-3 py-4">
               <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
@@ -88,8 +79,6 @@ function NewPaymentContent() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Attachments — full width */}
           <AttachmentPanel transactionId={createdId} transactionRef={createdRef} />
         </div>
       )}

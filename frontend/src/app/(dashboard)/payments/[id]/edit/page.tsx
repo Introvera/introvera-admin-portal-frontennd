@@ -9,9 +9,7 @@ import { PaymentTransactionForm } from "@/components/forms/PaymentTransactionFor
 import { AttachmentPanel } from "@/components/attachments/AttachmentPanel";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function EditPaymentPage() {
   const params = useParams();
@@ -58,33 +56,25 @@ export default function EditPaymentPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
           <Link href={`/payments/${id}`}><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Edit Transaction</h2>
-          <p className="text-sm text-muted-foreground">{tx.transactionReference}</p>
+          <h2 className="text-lg font-semibold tracking-tight">Edit Transaction</h2>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5">{tx.transactionReference}</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid gap-5 lg:grid-cols-5">
         {/* Form */}
         <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Transaction Details</CardTitle>
-              <CardDescription>Update the payment information</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PaymentTransactionForm
-                initialData={tx}
-                onSubmit={handleSubmit}
-                onCancel={() => router.push(`/payments/${id}`)}
-                isLoading={isSubmitting}
-              />
-            </CardContent>
-          </Card>
+          <PaymentTransactionForm
+            initialData={tx}
+            onSubmit={handleSubmit}
+            onCancel={() => router.push(`/payments/${id}`)}
+            isLoading={isSubmitting}
+          />
         </div>
 
         {/* Attachments */}

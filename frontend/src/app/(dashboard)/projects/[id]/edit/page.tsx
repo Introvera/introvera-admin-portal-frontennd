@@ -9,7 +9,6 @@ import { ProjectForm } from "@/components/forms/ProjectForm";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function EditProjectPage() {
   const params = useParams();
@@ -38,17 +37,21 @@ export default function EditProjectPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="h-8 w-8" asChild><Link href={`/projects/${id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+          <Link href={`/projects/${id}`}><ArrowLeft className="h-4 w-4" /></Link>
+        </Button>
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Edit Project</h2>
-          <p className="text-sm text-muted-foreground">{project.name}</p>
+          <h2 className="text-lg font-semibold tracking-tight">Edit Project</h2>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5">{project.name}</p>
         </div>
       </div>
-      <Card>
-        <CardHeader><CardTitle className="text-base">Project Details</CardTitle><CardDescription>Update your project information</CardDescription></CardHeader>
-        <CardContent><ProjectForm initialData={project} onSubmit={handleSubmit} onCancel={() => router.push(`/projects/${id}`)} isLoading={isSubmitting} /></CardContent>
-      </Card>
+      <ProjectForm
+        initialData={project}
+        onSubmit={handleSubmit}
+        onCancel={() => router.push(`/projects/${id}`)}
+        isLoading={isSubmitting}
+      />
     </div>
   );
 }

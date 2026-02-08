@@ -111,8 +111,8 @@ export default function PaymentsListPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">Payment Transactions</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Track and manage all payment records</p>
+            <h2 className="text-lg font-semibold tracking-tight">Payment Transactions</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">Track and manage all payment records</p>
           </div>
           <Button asChild className="gap-2">
             <Link href="/payments/new"><Plus className="h-4 w-4" /> Add Payment</Link>
