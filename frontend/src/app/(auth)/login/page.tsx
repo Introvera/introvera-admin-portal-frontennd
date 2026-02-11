@@ -152,3 +152,4 @@ function getFirebaseErrorMessage(err: unknown): string {
       return "Sign in failed. Please try again.";
   }
 }
+

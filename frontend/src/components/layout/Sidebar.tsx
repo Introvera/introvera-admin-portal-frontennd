@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, CreditCard, Users, Settings,
   PanelLeftClose, PanelLeft, ChevronDown, Plus, List, FolderKanban,
-  LogOut, Shield, type LucideIcon,
+  LogOut, Shield, MessageSquare, FileCode2, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,26 @@ const navItems: NavItem[] = [
     children: [
       { label: "All Projects", href: "/projects", icon: List, permission: "projects.read" },
       { label: "New Project", href: "/projects/new", icon: Plus, permission: "projects.create" },
+    ],
+  },
+  {
+    label: "WA Templates",
+    href: "/whatsapp-templates",
+    icon: FileCode2,
+    permission: "scheduled_messages.read",
+    children: [
+      { label: "All Templates", href: "/whatsapp-templates", icon: List, permission: "scheduled_messages.read" },
+      { label: "New Template", href: "/whatsapp-templates/new", icon: Plus, permission: "scheduled_messages.create" },
+    ],
+  },
+  {
+    label: "Scheduled Messages",
+    href: "/scheduled-messages",
+    icon: MessageSquare,
+    permission: "scheduled_messages.read",
+    children: [
+      { label: "All Schedules", href: "/scheduled-messages", icon: List, permission: "scheduled_messages.read" },
+      { label: "New Schedule", href: "/scheduled-messages/new", icon: Plus, permission: "scheduled_messages.create" },
     ],
   },
   {
